@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspose.Words" Version="26.1.0" />
+    <PackageReference Include="IPO.Common.API" Version="2.0.424491" />
+    <PackageReference Include="Spire.PDF" Version="11.10.4" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IPO.Dictionary.Interfaces\IPO.Dictionary.Interfaces.csproj" />
+    <ProjectReference Include="..\IPO.Dictionary.Models\IPO.Dictionary.Models.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,118 @@
+﻿using AwesomeAssertions;
+using IPO.Dictionary.Models;
+using IPO.Dictionary.Models.DictionarySearch;
+using IPO.Dictionary.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IPO.Dictionary.UnitTests.Services.Processors
+{
+    [TestClass]
+    public class OdtProcessorTests
+    {
+        private readonly OdtProcessor _processor;
+
+        public OdtProcessorTests()
+        {
+            this._processor = new OdtProcessor();
+        }
+
+        [TestMethod]
+        public void SearchDocumentWhenFileEncryptedReturnsFileEncryptedError()
+        {
+            // Arrange
+            var expectedResult = ProcessResults.CreateFailedProcessResultsModel(ErrorType.FileEncrypted);
+            var processModel = new DictionarySearchProcessModel(DictionarySearchFileType.Odt, DocumentBuilder.CreateOdtWithEncryption(), Array.Empty<DictionaryValue>());
+
+            // Act
+            var result = _processor.SearchDocument(processModel);
+
+            // Assert
+            result.Should().NotBeNull();
+            var processResult = result.As<ProcessResults>();
+            processResult.Match.Should().Be(expectedResult.Match);
+            processResult.HasMatch.Should().Be(expectedResult.HasMatch);
+            processResult.ErrorType.Should().Be(expectedResult.ErrorType);
+            processResult.HasError.Should().Be(expectedResult.HasError);
+        }
+
+        [TestMethod]
+        public void SearchDocumentWhenFileCannotBeLoadedReturnsFileCannotBeLoadedError()
+        {
+            // Arrange
+            var expectedResult = ProcessResults.CreateFailedProcessResultsModel(ErrorType.FileCannotBeLoaded);
+            var processModel = new DictionarySearchProcessModel(DictionarySearchFileType.Odt, null!, Array.Empty<DictionaryValue>());
+
+            // Act
+            var result = _processor.SearchDocument(processModel);
+
+            // Assert
+            result.Should().NotBeNull();
+            var processResult = result.As<ProcessResults>();
+            processResult.Match.Should().Be(expectedResult.Match);
+            processResult.HasMatch.Should().Be(expectedResult.HasMatch);
+            processResult.ErrorType.Should().Be(expectedResult.ErrorType);
+            processResult.HasError.Should().Be(expectedResult.HasError);
+        }
+
+
+        [TestMethod]
+        public void SearchDocumentWhenFileContainsMatchReturnsCorrectMatch()
+        {
+            // Arrange
+            var match = Guid.NewGuid().ToString();
+            var dictionaryData = new DictionaryValue[] { new DictionaryValue( match, DictionaryValueType.Word ), new DictionaryValue( Guid.NewGuid().ToString(), DictionaryValueType.Word), new DictionaryValue( Guid.NewGuid().ToString(), DictionaryValueType.Word) };
+            var expectedResult = ProcessResults.CreateSuccesfulProcessResultsModel(true, match);
+            var processModel = new DictionarySearchProcessModel(DictionarySearchFileType.Odt, DocumentBuilder.CreateOdt(match: match), dictionaryData);
+
+            // Act
+            var result = _processor.SearchDocument(processModel);
+
+            // Assert
+            result.Should().NotBeNull();
+            var processResult = result.As<ProcessResults>();
+            processResult.Match.Should().Be(expectedResult.Match);
+            processResult.HasMatch.Should().Be(expectedResult.HasMatch);
+            processResult.HasError.Should().Be(expectedResult.HasError);
+        }
+
+        [TestMethod]
+        public void SearchDocumentWhenFileNotContainsMatchReturnsNonMatchResult()
+        {
+            // Arrange
+            var match = Guid.NewGuid().ToString();
+            var dictionaryData = new DictionaryValue[] { new DictionaryValue(Guid.NewGuid().ToString() + "one", DictionaryValueType.Word)
+                                                        , new DictionaryValue(Guid.NewGuid().ToString() + "two", DictionaryValueType.Word)
+                                                        , new DictionaryValue(Guid.NewGuid().ToString() + "three", DictionaryValueType.Word) };
+            var expectedResult = ProcessResults.CreateSuccesfulProcessResultsModel(false);
+            var processModel = new DictionarySearchProcessModel(DictionarySearchFileType.Odt, DocumentBuilder.CreateOdt(match: match), dictionaryData);
+
+            // Act
+            var result = _processor.SearchDocument(processModel);
+
+            // Assert
+            result.Should().NotBeNull();
+            var processResult = result.As<ProcessResults>();
+            processResult.Match.Should().Be(expectedResult.Match);
+            processResult.HasMatch.Should().Be(expectedResult.HasMatch);
+            processResult.HasError.Should().Be(expectedResult.HasError);
+        }
+
+        [TestMethod]
+        public void DictionarySearchFileTypeReturnsCorrectType()
+        {
+            // Arrange
+            var expectedType = DictionarySearchFileType.Odt;
+
+            // Act
+            var result = this._processor.DictionarySearchFileType;
+
+            // Assert
+            result.Should().Be(expectedType);
+        }
+    }
+}
